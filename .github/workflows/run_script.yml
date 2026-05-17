@@ -1,0 +1,48 @@
+name: Update thokomo Playlist
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  build-playlist:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Public Repo
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Checkout Private Repo Script
+      uses: actions/checkout@v4
+      with:
+        repository: bpktv/scripting
+        token: ${{ secrets.PRIVATE_REPO_TOKEN }}
+        path: private-code
+        persist-credentials: true
+
+    - name: Install Python Dependencies
+      run: |
+        pip install requests
+
+    - name: Run Token Extractor Script
+      run: python private-code/ghop.py
+
+    - name: Commit and Push to Both Repos
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@://github.com'
+        
+        # 1. Public Repo (thokomo) mein playlist.m3u push karna
+        git add playlist.m3u
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Automated Playlist Token Update" && git push)
+
+        # 2. Private Repo (scripting) mein token.json push karna
+        cd private-code
+        git add token.json
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Private Token Log Updated (IST)" && git push)
