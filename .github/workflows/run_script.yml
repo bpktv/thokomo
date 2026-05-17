@@ -2,7 +2,7 @@ name: Update thokomo Playlist
 
 on:
   schedule:
-    - cron: '*/28 * * * *'
+    - cron: '*/55 * * * *'
   workflow_dispatch:
 
 jobs:
