@@ -22,24 +22,28 @@ jobs:
         repository: bpktv/scripting
         token: ${{ secrets.PRIVATE_REPO_TOKEN }}
         path: private-code
-        persist-credentials: true
 
-    - name: Install Python Dependencies
-      run: |
-        pip install requests
+    - name: Install dependencies
+      run: pip install requests
 
-    - name: Run Token Extractor Script
+    - name: Run script
       run: python private-code/ghop.py
 
-    - name: Commit and Push to Both Repos
+    - name: Commit Public Repo Changes
       run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@://github.com'
-        
-        git add playlist.m3u
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Automated Playlist Token Update" && git push --force)
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
+        git add playlist.m3u
+        git commit -m "Automated Playlist Update" || echo "No changes"
+        git push
+
+    - name: Commit Private Repo Changes
+      run: |
         cd private-code
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
         git add token.json
-        git pull --rebase origin main
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Private Token Log Updated (IST)" && git push)
+        git commit -m "Private Token Log Updated" || echo "No changes"
+        git push
