@@ -3,6 +3,10 @@ name: Update thokomo Playlist
 on:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   build-playlist:
     runs-on: ubuntu-latest
@@ -29,15 +33,26 @@ jobs:
     - name: Run script
       run: python private-code/ghop.py
 
+    # =======================
+    # SAFE COMMIT PUBLIC REPO
+    # =======================
     - name: Commit Public Repo Changes
       run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
 
         git add playlist.m3u
-        git commit -m "Automated Playlist Update" || echo "No changes"
-        git push
 
+        if git diff --cached --quiet; then
+          echo "No changes to commit (public repo)"
+        else
+          git commit -m "Automated Playlist Update"
+          git push
+        fi
+
+    # =======================
+    # SAFE COMMIT PRIVATE REPO
+    # =======================
     - name: Commit Private Repo Changes
       run: |
         cd private-code
@@ -45,5 +60,10 @@ jobs:
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
         git add token.json
-        git commit -m "Private Token Log Updated" || echo "No changes"
-        git push
+
+        if git diff --cached --quiet; then
+          echo "No changes to commit (private repo)"
+        else
+          git commit -m "Private Token Log Updated"
+          git push
+        fi
