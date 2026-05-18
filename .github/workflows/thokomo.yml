@@ -1,8 +1,6 @@
 name: Update thokomo Playlist
 
 on:
-  schedule:
-    - cron: '*/57 * * * *'
   workflow_dispatch:
 
 jobs:
