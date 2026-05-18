@@ -36,11 +36,10 @@ jobs:
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@://github.com'
         
-        # 1. Public Repo (thokomo) mein playlist.m3u push karna
         git add playlist.m3u
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Automated Playlist Token Update" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Automated Playlist Token Update" && git push --force)
 
-        # 2. Private Repo (scripting) mein token.json push karna
         cd private-code
         git add token.json
+        git pull --rebase origin main
         git diff --quiet && git diff --staged --quiet || (git commit -m "Private Token Log Updated (IST)" && git push)
