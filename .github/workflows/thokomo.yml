@@ -43,8 +43,16 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
-        git add playlist.m3u token.json
+        # safe add (no crash if file missing)
+        if [ -f playlist.m3u ]; then
+          git add playlist.m3u
+        fi
 
+        if [ -f token.json ]; then
+          git add token.json
+        fi
+
+        # commit only if changes exist
         if git diff --cached --quiet; then
           echo "No changes to commit"
         else
